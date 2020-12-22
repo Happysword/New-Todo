@@ -15,7 +15,18 @@
               <v-row no-gutters class="text-h6 font-weight-medium">
                 {{ Name }}
               </v-row>
-              <v-row no-gutters class="text-subtitle-1 font-weight-light">
+              <v-row
+                v-if="List.length === 1"
+                no-gutters
+                class="font-weight-light font-small"
+              >
+                {{ List.length }} Task
+              </v-row>
+              <v-row
+                v-else-if="List.length > 0"
+                no-gutters
+                class="font-weight-light font-small"
+              >
                 {{ List.length }} Tasks
               </v-row>
             </v-col>
@@ -60,6 +71,7 @@
                 placeholder="New Entry"
                 hide-details="auto"
                 append-icon="mdi-plus-circle"
+                @keypress="checkEnter($event)"
                 @click:append="toggleinput"
               ></v-text-field>
             </v-col>
@@ -81,7 +93,6 @@
 export default {
   name: "TodoList",
   data: () => ({
-    Name: "Thu, July 6, 2017",
     List: [],
     NewInput: false,
     message: ""
@@ -102,15 +113,50 @@ export default {
       this.List = [];
       localStorage.setItem("TodoList", JSON.stringify(this.List));
     },
+    checkEnter(e) {
+      if (e.keyCode === 13) this.toggleinput();
+    },
     InsertInput() {
       this.NewInput = true;
-      console.log(document.getElementById("inputval"));
-      document.getElementById("inputval").focus();
+      this.$nextTick(() => {
+        document.getElementById("inputval").focus();
+      });
     }
   },
   created() {
     this.List = JSON.parse(localStorage.getItem("TodoList"));
     if (this.List === null) this.List = [];
+  },
+  computed: {
+    Name() {
+      const Days = ["Sun", "Mon", "Tues", "Wed", "Thu", "Fri", "Sat"];
+      const Months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "June",
+        "July",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec"
+      ];
+      var today = new Date();
+      var mm = String(today.getMonth() + 1).padStart(2, "0");
+      var yyyy = today.getFullYear();
+      return String(
+        Days[today.getDay()] +
+          ", " +
+          Months[Number(mm) - 1] +
+          " " +
+          mm +
+          ", " +
+          String(yyyy)
+      );
+    }
   }
 };
 </script>
@@ -160,5 +206,9 @@ export default {
 .removed-text {
   color: #dddee0;
   text-decoration: line-through;
+}
+.font-small {
+  font-size: 13px;
+  margin: 0px;
 }
 </style>
